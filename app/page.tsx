@@ -282,26 +282,41 @@ const LEARNING_DEFAULTS = {
   boxes: 130,
 };
 
-// BRENZ brand palette (matched to brenz.com — deep brand red, warm cream, charcoal)
-const BRENZ_RED = "#C8252C";        // primary brand red
-const BRENZ_RED_DEEP = "#9E1B22";   // pressed / hover
-const BRENZ_CREAM = "#F5EBD8";      // brand cream / paper
-const BRENZ_INK = "#1A1614";        // near-black, warmer than pure black
-const BRENZ_PANEL = "#241D1A";      // slightly lifted panel surface
-const BRENZ_LINE = "#3D322C";       // muted divider
-const BRENZ_GOLD = "#E8B257";       // accent / star color
-const BRENZ_GREEN = "#7DB069";      // positive
-const BRENZ_RED_BAD = "#E07A6F";    // negative (lighter red so it doesn't fight brand red)
+// Sign panel = dark slate. Logo = white. Building = warm tan brick.
+const BRENZ_SLATE = "#1F262B";       // signage panel — primary brand surface
+const BRENZ_SLATE_DEEP = "#1F262B";  // deeper layer / app background
+const BRENZ_SLATE_PANEL = "#363F46"; // raised panels, cards
+const BRENZ_LINE = "#4A535B";        // dividers
+const BRENZ_WHITE = "#FFFFFF";       // logo white
+const BRENZ_CREAM = "#F5EBD8";       // soft warm contrast (kept from prior)
+const BRENZ_TAN = "#C8A878";         // building / accent warm tone
+const BRENZ_GOLD = "#E8B257";        // star / rating accent
+const BRENZ_GREEN = "#7DB069";       // positive
+const BRENZ_RED = "#C8252C";         // small accent only — alerts, danger
+const BRENZ_RED_BAD = "#E07A6F";     // negative
 
-// Aliases used throughout (kept for minimal diff)
-const ORANGE = BRENZ_RED;
+// Aliases used throughout
+const ORANGE = BRENZ_RED;            // used sparingly — primary CTAs are now slate/cream
 const GOLD = BRENZ_GOLD;
 const CREAM = BRENZ_CREAM;
-const NIGHT = BRENZ_INK;
-const PANEL = BRENZ_PANEL;
+const NIGHT = BRENZ_SLATE_DEEP;
+const PANEL = BRENZ_SLATE_PANEL;
 const LINE = BRENZ_LINE;
 const GREEN = BRENZ_GREEN;
 const RED = BRENZ_RED_BAD;
+
+// Logo asset paths — files live in /public
+// Make sure these three files exist at exactly these paths (case-sensitive!):
+//   /public/brenz-logo-stacked.png
+//   /public/brenz-logo-horizontal.png
+//   /public/storefront.jpeg
+const LOGO_STACKED = "/brenz-logo-stacked.png";
+const LOGO_HORIZONTAL = "/brenz-logo-horizontal.png";
+const STOREFRONT_IMG = "/storefront.jpeg";
+
+// Backward-compat aliases (old code referenced these names)
+const BRENZ_INK = BRENZ_SLATE_DEEP;
+const BRENZ_PANEL = BRENZ_SLATE_PANEL;
 
 /* ----- Empire constants: GMs, advertising, second location ----- */
 
@@ -1383,12 +1398,7 @@ export default function Page() {
       {/* BRENZ brand header */}
       {state.screen !== "intro" && state.screen !== "modeSelect" && (
         <div style={brenzHeader}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-            <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 22,
-              color: BRENZ_RED, letterSpacing: 1.5 }}>BRENZ</span>
-            <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 12,
-              color: BRENZ_GOLD, letterSpacing: 2 }}>PIZZA CO.</span>
-          </div>
+          <BrenzLogo variant="horizontal" height={18} />
           {state.storeSize === "campus" && (
             <span style={{ fontSize: 9, padding: "3px 7px", background: BRENZ_RED,
               color: "white", borderRadius: 4, fontWeight: 800, letterSpacing: 1 }}>
@@ -1599,77 +1609,126 @@ export default function Page() {
    SCREEN COMPONENTS
    ============================================================ */
 
-function IntroScreen({ onStart }: { onStart: () => void }) {
+// BRENZ logo component — uses real PNG, falls back to typography if image fails to load
+function BrenzLogo({ variant, height = 18 }: { variant: "stacked" | "horizontal"; height?: number }) {
+  const [failed, setFailed] = useState(false);
+  const src = variant === "stacked" ? LOGO_STACKED : LOGO_HORIZONTAL;
+
+  if (failed) {
+    // Typographic fallback styled to match the actual BRENZ logo geometry
+    if (variant === "stacked") {
+      return (
+        <div style={{ textAlign: "center", display: "inline-block" }}>
+          <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 56,
+            color: BRENZ_WHITE, letterSpacing: 1, lineHeight: 0.85, fontWeight: 800 }}>
+            BRENZ
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 5,
+            marginTop: 4 }}>
+            <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 28,
+              color: BRENZ_WHITE, letterSpacing: 2, fontWeight: 800 }}>PIZZA</span>
+            <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 13,
+              color: BRENZ_WHITE, letterSpacing: 1,
+              borderBottom: `2px solid ${BRENZ_WHITE}`, paddingBottom: 2, fontWeight: 800 }}>
+              co.
+            </span>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+        <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: height,
+          color: BRENZ_WHITE, letterSpacing: 1, lineHeight: 1, fontWeight: 800 }}>BRENZ</span>
+        <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: height * 0.78,
+          color: BRENZ_WHITE, letterSpacing: 1.5, lineHeight: 1, fontWeight: 800 }}>PIZZA</span>
+        <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: height * 0.5,
+          color: BRENZ_WHITE, letterSpacing: 0.5, lineHeight: 1,
+          borderBottom: `1.5px solid ${BRENZ_WHITE}`, paddingBottom: 1, fontWeight: 800 }}>
+          co.
+        </span>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ padding: "40px 28px 40px", textAlign: "center", display: "flex",
-      flexDirection: "column", justifyContent: "center", minHeight: "100%",
-      background: `radial-gradient(circle at 50% 30%, #2a1f1a 0%, ${BRENZ_INK} 70%)` }}>
-
-      <BrenzStamp />
-
-      <div style={{ marginTop: 24, fontSize: 11, letterSpacing: 6, color: BRENZ_GOLD, fontWeight: 800 }}>
-        BRENZ PIZZA CO. PRESENTS
-      </div>
-
-      <h1 style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 64, lineHeight: 0.85,
-        margin: "8px 0 0 0", letterSpacing: 1, color: BRENZ_CREAM }}>
-        THE BRENZ<br />
-        <span style={{ color: BRENZ_RED }}>PIZZA GAME</span>
-      </h1>
-
-      <div style={{ width: 60, height: 3, background: BRENZ_RED, margin: "20px auto" }} />
-
-      <p style={{ color: "#c8b48c", fontSize: 16, lineHeight: 1.6, fontFamily: "'Fraunces',serif",
-        fontStyle: "italic" }}>
-        Try some;<br />you'll taste the love.
-      </p>
-
-      <p style={{ color: "#c8b48c", fontSize: 14, lineHeight: 1.6, fontFamily: "'Fraunces',serif", marginTop: 18 }}>
-        Run a Brenz location for 30 days.<br />
-        One product, one shot: a 12" pepperoni.
-      </p>
-
-      <div style={{ marginTop: 22, padding: 14, background: `${BRENZ_RED}15`,
-        border: `1px solid ${BRENZ_RED}`, borderRadius: 12 }}>
-        <div style={{ fontSize: 10, letterSpacing: 2, color: BRENZ_RED, fontWeight: 800 }}>
-          THIS WEEK AT BRENZ
-        </div>
-        <div style={{ marginTop: 6, fontSize: 12, color: BRENZ_CREAM, lineHeight: 1.5 }}>
-          MON · Wing Night, 50% off<br />
-          TUE · 25TUES specialty pizza<br />
-          WED · Brenzday Wednesday
-        </div>
-      </div>
-
-      <button onClick={onStart} style={{ ...primaryBtn, marginTop: 28 }}>START MY ORDER →</button>
-
-      <div style={{ marginTop: 16, fontSize: 10, color: "#5a4f44", letterSpacing: 1 }}>
-        Locations: Chapel Hill · Columbus · Knoxville · Dublin · Durham
-      </div>
-    </div>
+    <img
+      src={src}
+      alt="BRENZ PIZZA CO."
+      onError={() => setFailed(true)}
+      style={
+        variant === "stacked"
+          ? { width: 180, height: "auto", margin: "0 auto", display: "block" }
+          : { height, width: "auto", display: "block" }
+      }
+    />
   );
 }
 
-// Brenz stamp / brand mark
-function BrenzStamp() {
+function IntroScreen({ onStart }: { onStart: () => void }) {
   return (
-    <div style={{ display: "flex", justifyContent: "center" }}>
-      <div style={{
-        width: 110, height: 110,
-        borderRadius: "50%",
-        border: `3px solid ${BRENZ_RED}`,
-        background: BRENZ_INK,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        flexDirection: "column",
-        position: "relative",
-        boxShadow: `0 0 0 1px ${BRENZ_LINE}, 0 8px 24px rgba(200,37,44,0.3)`,
-      }}>
-        <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 11, color: BRENZ_GOLD,
-          letterSpacing: 2, marginTop: -4 }}>EST.</div>
-        <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, color: BRENZ_RED,
-          letterSpacing: 1, lineHeight: 1, marginTop: 2 }}>BRENZ</div>
-        <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 8, color: BRENZ_CREAM,
-          letterSpacing: 3, marginTop: 4 }}>PIZZA · CO.</div>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100%",
+      background: BRENZ_SLATE_DEEP }}>
+
+      {/* Storefront hero photo */}
+      <div style={{ position: "relative", width: "100%", aspectRatio: "16/9",
+        overflow: "hidden", flexShrink: 0 }}>
+        <img src={STOREFRONT_IMG} alt="BRENZ Pizza storefront"
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        {/* Subtle bottom gradient so the logo block reads cleanly when it sits below */}
+        <div style={{ position: "absolute", inset: 0,
+          background: `linear-gradient(180deg, transparent 60%, ${BRENZ_SLATE_DEEP} 100%)` }} />
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: "20px 28px 32px", textAlign: "center", flex: 1,
+        display: "flex", flexDirection: "column", justifyContent: "center" }}>
+
+        {/* Real logo (with typographic fallback if image is missing) */}
+        <BrenzLogo variant="stacked" />
+
+        <div style={{ marginTop: 20, fontSize: 11, letterSpacing: 6, color: BRENZ_GOLD,
+          fontWeight: 800 }}>
+          PRESENTS
+        </div>
+
+        <h1 style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 56, lineHeight: 0.9,
+          margin: "10px 0 0 0", letterSpacing: 1, color: BRENZ_WHITE }}>
+          THE PIZZA<br />GAME
+        </h1>
+
+        <div style={{ width: 60, height: 3, background: BRENZ_RED, margin: "20px auto" }} />
+
+        <p style={{ color: BRENZ_CREAM, fontSize: 16, lineHeight: 1.6,
+          fontFamily: "'Fraunces',serif", fontStyle: "italic", margin: 0 }}>
+          Try some;<br />you'll taste the love.
+        </p>
+
+        <p style={{ color: "#a8b2bc", fontSize: 14, lineHeight: 1.6,
+          fontFamily: "'Fraunces',serif", marginTop: 16 }}>
+          Run a Brenz location for 30 days.<br />
+          One product, one shot: a 12" pepperoni.
+        </p>
+
+        <div style={{ marginTop: 22, padding: 14, background: `${BRENZ_RED}1A`,
+          border: `1px solid ${BRENZ_RED}`, borderRadius: 12, textAlign: "left" }}>
+          <div style={{ fontSize: 10, letterSpacing: 2, color: BRENZ_RED, fontWeight: 800 }}>
+            THIS WEEK AT BRENZ
+          </div>
+          <div style={{ marginTop: 6, fontSize: 12, color: BRENZ_CREAM, lineHeight: 1.7 }}>
+            <strong>MON</strong> · Wing Night, 50% off<br />
+            <strong>TUE</strong> · 25TUES specialty pizza<br />
+            <strong>WED</strong> · Brenzday Wednesday
+          </div>
+        </div>
+
+        <button onClick={onStart} style={{ ...primaryBtn, marginTop: 28 }}>
+          START MY STORE →
+        </button>
+
+        <div style={{ marginTop: 18, fontSize: 10, color: "#7d8993", letterSpacing: 1.2 }}>
+          CHAPEL HILL · COLUMBUS · KNOXVILLE · DUBLIN · DURHAM
+        </div>
       </div>
     </div>
   );
@@ -2816,8 +2875,8 @@ const brenzHeader: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  padding: "10px 16px",
-  background: BRENZ_INK,
+  padding: "12px 16px",
+  background: BRENZ_SLATE,
   borderBottom: `2px solid ${BRENZ_RED}`,
 };
 
