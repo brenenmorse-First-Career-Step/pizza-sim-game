@@ -307,12 +307,12 @@ const GREEN = BRENZ_GREEN;
 const RED = BRENZ_RED_BAD;
 
 // Logo asset paths — files live in /public
-// Make sure these three files exist at exactly these paths (case-sensitive!):
-//   /public/stacked.png
-//   /public/horizontal.png
+// Make sure these three files exist at exactly these paths (case-sensitive on Linux/Vercel!):
+//   /public/Brenzstacked.png
+//   /public/Brenzhorizontal.png
 //   /public/storefront.jpeg
-const LOGO_STACKED = "/stacked.png";
-const LOGO_HORIZONTAL = "/horizontal.png";
+const LOGO_STACKED = "/Brenzstacked.png";
+const LOGO_HORIZONTAL = "/Brenzhorizontal.png";
 const STOREFRONT_IMG = "/storefront.jpeg";
 
 // Backward-compat aliases (old code referenced these names)
@@ -1605,26 +1605,110 @@ export default function Page() {
 // (Originally tried to load /public PNGs but Next.js returns the 404 HTML page
 //  for missing files, which browsers don't treat as an image error. Pure CSS
 //  is simpler and matches the real logo geometry well enough.)
-function BrenzLogo({
-  variant,
-  height = 18,
-}: {
-  variant: "stacked" | "horizontal";
-  height?: number;
-}) {
-  const src = variant === "stacked" ? "/Stacked.png" : "/Horizontal.png";
+function BrenzLogo({ variant, height = 18 }: { variant: "stacked" | "horizontal"; height?: number }) {
+  const [failed, setFailed] = useState(false);
+  const src = variant === "stacked" ? LOGO_STACKED : LOGO_HORIZONTAL;
 
+  // Try to load the real PNG first
+  if (!failed) {
+    return (
+      <img
+        src={src}
+        alt="BRENZ PIZZA CO."
+        onError={() => setFailed(true)}
+        style={
+          variant === "stacked"
+            ? { width: 220, height: "auto", margin: "0 auto", display: "block" }
+            : { height: height * 1.6, width: "auto", display: "block" }
+        }
+      />
+    );
+  }
+
+  // Fallback: typographic version using Anton — never breaks
+  const logoFont = "'Anton', 'Bebas Neue', 'Impact', sans-serif";
+
+  if (variant === "stacked") {
+    return (
+      <div style={{ display: "inline-block", textAlign: "center", lineHeight: 1 }}>
+        <div style={{
+          fontFamily: logoFont,
+          fontWeight: 400,
+          fontSize: 84,
+          letterSpacing: 1,
+          color: BRENZ_WHITE,
+          lineHeight: 0.82,
+          textTransform: "uppercase",
+        }}>
+          BRENZ
+        </div>
+        <div style={{
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "center",
+          gap: 4,
+          marginTop: 4,
+        }}>
+          <span style={{
+            fontFamily: logoFont,
+            fontWeight: 400,
+            fontSize: 42,
+            letterSpacing: 2,
+            color: BRENZ_WHITE,
+            lineHeight: 0.82,
+            textTransform: "uppercase",
+          }}>
+            PIZZA
+          </span>
+          <span style={{
+            fontFamily: logoFont,
+            fontWeight: 400,
+            fontSize: 16,
+            color: BRENZ_WHITE,
+            lineHeight: 0.82,
+            borderBottom: `2.5px solid ${BRENZ_WHITE}`,
+            paddingBottom: 4,
+            textTransform: "lowercase",
+            marginBottom: 1,
+          }}>
+            co.
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // Horizontal fallback
   return (
-    <img
-      src={src}
-      alt={variant === "stacked" ? "Brenz stacked logo" : "Brenz horizontal logo"}
-      style={{
-        height: 60,
-        width: "Auto",
-        display: "block",
-        objectFit: "contain",
-      }}
-    />
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 3, lineHeight: 1 }}>
+      <span style={{
+        fontFamily: logoFont,
+        fontWeight: 400,
+        fontSize: height * 1.7,
+        letterSpacing: 0.5,
+        color: BRENZ_WHITE,
+        lineHeight: 0.82,
+        textTransform: "uppercase",
+      }}>BRENZ</span>
+      <span style={{
+        fontFamily: logoFont,
+        fontWeight: 400,
+        fontSize: height * 1.45,
+        letterSpacing: 1,
+        color: BRENZ_WHITE,
+        lineHeight: 0.82,
+        textTransform: "uppercase",
+      }}>PIZZA</span>
+      <span style={{
+        fontFamily: logoFont,
+        fontWeight: 400,
+        fontSize: height * 0.65,
+        color: BRENZ_WHITE,
+        lineHeight: 0.82,
+        borderBottom: `1.5px solid ${BRENZ_WHITE}`,
+        paddingBottom: 1,
+      }}>co.</span>
+    </div>
   );
 }
 
@@ -1686,7 +1770,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         </div>
 
         <button onClick={onStart} style={{ ...primaryBtn, marginTop: 28 }}>
-          START MY StORE →
+          START MY ORDER →
         </button>
 
         <div style={{ marginTop: 18, fontSize: 10, color: "#7d8993", letterSpacing: 1.2 }}>
