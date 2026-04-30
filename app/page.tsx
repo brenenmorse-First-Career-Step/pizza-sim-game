@@ -283,16 +283,17 @@ const LEARNING_DEFAULTS = {
 };
 
 // Sign panel = dark slate. Logo = white. Building = warm tan brick.
-const BRENZ_SLATE = "#1F262B";       // signage panel — primary brand surface
-const BRENZ_SLATE_DEEP = "#1F262B";  // deeper layer / app background
-const BRENZ_SLATE_PANEL = "#363F46"; // raised panels, cards
-const BRENZ_LINE = "#4A535B";        // dividers
+const BRENZ_SLATE = "#1A1F23";       // signage panel — kept slightly lifted from background
+const BRENZ_SLATE_DEEP = "#0A0C0E";  // app background — nearly black like brenz.com
+const BRENZ_SLATE_PANEL = "#1E2429"; // raised panels, cards
+const BRENZ_LINE = "#2D353B";        // dividers
 const BRENZ_WHITE = "#FFFFFF";       // logo white
 const BRENZ_CREAM = "#F5EBD8";       // soft warm contrast (kept from prior)
 const BRENZ_TAN = "#C8A878";         // building / accent warm tone
 const BRENZ_GOLD = "#E8B257";        // star / rating accent
 const BRENZ_GREEN = "#7DB069";       // positive
 const BRENZ_RED = "#C8252C";         // small accent only — alerts, danger
+const BRENZ_RED_DEEP = "#9E1B22";     // pressed / gradient end
 const BRENZ_RED_BAD = "#E07A6F";     // negative
 
 // Aliases used throughout
@@ -307,11 +308,11 @@ const RED = BRENZ_RED_BAD;
 
 // Logo asset paths — files live in /public
 // Make sure these three files exist at exactly these paths (case-sensitive!):
-//   /public/brenz-logo-stacked.png
-//   /public/brenz-logo-horizontal.png
+//   /public/stacked.png
+//   /public/horizontal.png
 //   /public/storefront.jpeg
-const LOGO_STACKED = "/brenz-logo-stacked.png";
-const LOGO_HORIZONTAL = "/brenz-logo-horizontal.png";
+const LOGO_STACKED = "/stacked.png";
+const LOGO_HORIZONTAL = "/horizontal.png";
 const STOREFRONT_IMG = "/storefront.jpeg";
 
 // Backward-compat aliases (old code referenced these names)
@@ -1386,15 +1387,6 @@ export default function Page() {
     <div style={pageWrap}>
       <style>{globalCSS}</style>
 
-      {state.screen !== "intro" && state.screen !== "modeSelect" && (
-        <div style={statusBar}>
-          <span>9:41</span>
-          <span style={{ display: "flex", gap: 4, alignItems: "center" }}>
-            <SignalIcon /> <BatteryIcon />
-          </span>
-        </div>
-      )}
-
       {/* BRENZ brand header */}
       {state.screen !== "intro" && state.screen !== "modeSelect" && (
         <div style={brenzHeader}>
@@ -1609,58 +1601,29 @@ export default function Page() {
    SCREEN COMPONENTS
    ============================================================ */
 
-// BRENZ logo component — uses real PNG, falls back to typography if image fails to load
-function BrenzLogo({ variant, height = 18 }: { variant: "stacked" | "horizontal"; height?: number }) {
-  const [failed, setFailed] = useState(false);
-  const src = variant === "stacked" ? LOGO_STACKED : LOGO_HORIZONTAL;
-
-  if (failed) {
-    // Typographic fallback styled to match the actual BRENZ logo geometry
-    if (variant === "stacked") {
-      return (
-        <div style={{ textAlign: "center", display: "inline-block" }}>
-          <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 56,
-            color: BRENZ_WHITE, letterSpacing: 1, lineHeight: 0.85, fontWeight: 800 }}>
-            BRENZ
-          </div>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 5,
-            marginTop: 4 }}>
-            <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 28,
-              color: BRENZ_WHITE, letterSpacing: 2, fontWeight: 800 }}>PIZZA</span>
-            <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 13,
-              color: BRENZ_WHITE, letterSpacing: 1,
-              borderBottom: `2px solid ${BRENZ_WHITE}`, paddingBottom: 2, fontWeight: 800 }}>
-              co.
-            </span>
-          </div>
-        </div>
-      );
-    }
-    return (
-      <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
-        <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: height,
-          color: BRENZ_WHITE, letterSpacing: 1, lineHeight: 1, fontWeight: 800 }}>BRENZ</span>
-        <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: height * 0.78,
-          color: BRENZ_WHITE, letterSpacing: 1.5, lineHeight: 1, fontWeight: 800 }}>PIZZA</span>
-        <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: height * 0.5,
-          color: BRENZ_WHITE, letterSpacing: 0.5, lineHeight: 1,
-          borderBottom: `1.5px solid ${BRENZ_WHITE}`, paddingBottom: 1, fontWeight: 800 }}>
-          co.
-        </span>
-      </div>
-    );
-  }
+// BRENZ logo component — pure CSS rendering of the wordmark, always works.
+// (Originally tried to load /public PNGs but Next.js returns the 404 HTML page
+//  for missing files, which browsers don't treat as an image error. Pure CSS
+//  is simpler and matches the real logo geometry well enough.)
+function BrenzLogo({
+  variant,
+  height = 18,
+}: {
+  variant: "stacked" | "horizontal";
+  height?: number;
+}) {
+  const src = variant === "stacked" ? "/Stacked.png" : "/Horizontal.png";
 
   return (
     <img
       src={src}
-      alt="BRENZ PIZZA CO."
-      onError={() => setFailed(true)}
-      style={
-        variant === "stacked"
-          ? { width: 180, height: "auto", margin: "0 auto", display: "block" }
-          : { height, width: "auto", display: "block" }
-      }
+      alt={variant === "stacked" ? "Brenz stacked logo" : "Brenz horizontal logo"}
+      style={{
+        height: 60,
+        width: "Auto",
+        display: "block",
+        objectFit: "contain",
+      }}
     />
   );
 }
@@ -1723,7 +1686,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         </div>
 
         <button onClick={onStart} style={{ ...primaryBtn, marginTop: 28 }}>
-          START MY STORE →
+          START MY StORE →
         </button>
 
         <div style={{ marginTop: 18, fontSize: 10, color: "#7d8993", letterSpacing: 1.2 }}>
@@ -1905,7 +1868,7 @@ function DecisionTile({ icon, title, summary, onClick, locked }: any) {
 function DecisionScreen({ title, subtitle, onBack, onSave, children }: any) {
   return (
     <div style={{ padding: "10px 16px 24px", height: "100%", overflowY: "auto" }}>
-      <button onClick={onBack} style={backBtn}>‹ Back</button>
+      <button onClick={onBack} style={backBtn}><span style={backArrowStyle}>‹</span><span>BACK</span></button>
       <h2 style={screenTitle}>{title}</h2>
       <p style={screenSub}>{subtitle}</p>
       <div style={{ marginTop: 18 }}>{children}</div>
@@ -1930,20 +1893,72 @@ type SliderProps = {
 };
 
 function Slider({ label, value, v, min, max, step, onChange, hint, warn }: SliderProps) {
+  // Position of the fill from 0 to 100%
+  const fillPct = max === min ? 0 : ((v - min) / (max - min)) * 100;
+
   return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-        <span style={{ fontWeight: 700, fontSize: 13 }}>{label}</span>
-        <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 26, color: GOLD, lineHeight: 1 }}>
+    <div style={{ marginBottom: 22 }}>
+      {/* Top row: label + current value */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline",
+        marginBottom: 10 }}>
+        <span style={{ fontWeight: 700, fontSize: 13, color: BRENZ_WHITE,
+          letterSpacing: 0.3, textTransform: "uppercase" }}>{label}</span>
+        <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 28,
+          color: BRENZ_RED, lineHeight: 1, fontWeight: 800 }}>
           {value}
         </span>
       </div>
-      <input type="range" min={min} max={max} step={step} value={v}
-        onChange={(e) => onChange(parseFloat(e.target.value))} style={rangeStyle} />
-      <div style={{ fontSize: 11, color: "#8f7d5d", marginTop: 4 }}>{hint}</div>
+
+      {/* Slider track + fill + native input overlay */}
+      <div style={{ position: "relative", height: 34, display: "flex", alignItems: "center" }}>
+        {/* Track background */}
+        <div style={{
+          position: "absolute", left: 0, right: 0, height: 8,
+          background: "#000",
+          border: `1px solid ${BRENZ_LINE}`,
+          borderRadius: 4,
+        }} />
+        {/* Filled portion in brand red */}
+        <div style={{
+          position: "absolute", left: 0, height: 8,
+          width: `${fillPct}%`,
+          background: `linear-gradient(90deg, ${BRENZ_RED_DEEP} 0%, ${BRENZ_RED} 100%)`,
+          borderRadius: 4,
+          transition: "width 0.08s ease-out",
+          pointerEvents: "none",
+        }} />
+        {/* Native input — invisible track, visible thumb (handled in globalCSS) */}
+        <input type="range" min={min} max={max} step={step} value={v}
+          onChange={(e) => onChange(parseFloat(e.target.value))}
+          className="brenz-slider"
+          style={{
+            position: "relative",
+            width: "100%",
+            height: 34,
+            background: "transparent",
+            margin: 0,
+            zIndex: 2,
+            WebkitAppearance: "none",
+            appearance: "none",
+            cursor: "grab",
+          }} />
+      </div>
+
+      {/* Min/max labels under the track */}
+      <div style={{ display: "flex", justifyContent: "space-between",
+        marginTop: 2, fontSize: 10, color: "#6c7882", fontWeight: 700, letterSpacing: 0.5 }}>
+        <span>{typeof min === "number" && step < 1 ? min.toFixed(2) : min}</span>
+        <span>{typeof max === "number" && step < 1 ? max.toFixed(2) : max}</span>
+      </div>
+
+      {/* Hint */}
+      <div style={{ fontSize: 11, color: "#8a96a0", marginTop: 6, lineHeight: 1.4 }}>{hint}</div>
+
+      {/* Warning if any */}
       {warn && (
         <div style={{ fontSize: 11, color: RED, marginTop: 6, padding: 8,
-          background: "rgba(255,157,132,0.08)", borderRadius: 8 }}>⚠ {warn}</div>
+          background: "rgba(255,157,132,0.08)", borderRadius: 8,
+          border: `1px solid ${RED}40` }}>⚠ {warn}</div>
       )}
     </div>
   );
@@ -1952,7 +1967,7 @@ function Slider({ label, value, v, min, max, step, onChange, hint, warn }: Slide
 function OpenScreen({ state, d, projDemand, canAfford, purchaseCost, onBack, onOpen }: any) {
   return (
     <div style={{ padding: "10px 16px 24px", height: "100%", overflowY: "auto" }}>
-      <button onClick={onBack} style={backBtn}>‹ Back</button>
+      <button onClick={onBack} style={backBtn}><span style={backArrowStyle}>‹</span><span>BACK</span></button>
       <h2 style={screenTitle}>READY TO OPEN?</h2>
       <p style={screenSub}>Last look before doors open at 11am.</p>
 
@@ -2421,7 +2436,7 @@ function MoneyScreen({ state, balanceSheet, incomeStatement, tAccounts, unlocks,
 
   return (
     <div style={{ padding: "10px 16px 24px", height: "100%", overflowY: "auto" }}>
-      <button onClick={onBack} style={backBtn}>‹ Back</button>
+      <button onClick={onBack} style={backBtn}><span style={backArrowStyle}>‹</span><span>BACK</span></button>
       <h2 style={screenTitle}>MONEY</h2>
       <p style={screenSub}>Books, equity, and the loan.</p>
 
@@ -2574,7 +2589,7 @@ function MoneyScreen({ state, balanceSheet, incomeStatement, tAccounts, unlocks,
 function EmpireScreen({ state, onBack, onHireGM, onRunAd, onInvestCampus }: any) {
   return (
     <div style={{ padding: "10px 16px 24px", height: "100%", overflowY: "auto" }}>
-      <button onClick={onBack} style={backBtn}>‹ Back</button>
+      <button onClick={onBack} style={backBtn}><span style={backArrowStyle}>‹</span><span>BACK</span></button>
       <h2 style={screenTitle}>EMPIRE</h2>
       <p style={screenSub}>The Brenz way to grow: people, marketing, location.</p>
 
@@ -2821,27 +2836,6 @@ function Star({ filled, big }: { filled: boolean; big?: boolean }) {
   );
 }
 
-function SignalIcon() {
-  return (
-    <svg width="14" height="10" viewBox="0 0 14 10" fill="white">
-      <rect x="0" y="6" width="2" height="4" rx="0.5" />
-      <rect x="3.5" y="4" width="2" height="6" rx="0.5" />
-      <rect x="7" y="2" width="2" height="8" rx="0.5" />
-      <rect x="10.5" y="0" width="2" height="10" rx="0.5" />
-    </svg>
-  );
-}
-
-function BatteryIcon() {
-  return (
-    <svg width="22" height="10" viewBox="0 0 22 10" fill="none">
-      <rect x="0.5" y="0.5" width="18" height="9" rx="2" stroke="white" />
-      <rect x="2" y="2" width="15" height="6" rx="1" fill="white" />
-      <rect x="19.5" y="3.5" width="1.5" height="3" rx="0.5" fill="white" />
-    </svg>
-  );
-}
-
 /* ============================================================
    STYLES
    ============================================================ */
@@ -2857,18 +2851,6 @@ const pageWrap: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
   position: "relative",
-};
-
-const statusBar: React.CSSProperties = {
-  height: 36,
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "flex-end",
-  padding: "0 24px 6px",
-  fontSize: 13,
-  fontWeight: 600,
-  color: "white",
-  background: NIGHT,
 };
 
 const brenzHeader: React.CSSProperties = {
@@ -2992,14 +2974,28 @@ const equityBtn: React.CSSProperties = {
 };
 
 const backBtn: React.CSSProperties = {
-  background: "transparent",
-  border: 0,
-  color: GOLD,
-  fontSize: 14,
-  fontWeight: 600,
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 6,
+  background: BRENZ_SLATE_PANEL,
+  border: `1px solid ${BRENZ_LINE}`,
+  color: BRENZ_WHITE,
+  fontSize: 13,
+  fontWeight: 700,
   cursor: "pointer",
-  padding: 0,
-  marginBottom: 6,
+  padding: "8px 14px 8px 10px",
+  borderRadius: 999,
+  marginBottom: 14,
+  letterSpacing: 0.3,
+  WebkitTapHighlightColor: "transparent",
+};
+
+const backArrowStyle: React.CSSProperties = {
+  fontSize: 18,
+  lineHeight: 1,
+  color: BRENZ_RED,
+  fontWeight: 900,
+  marginTop: -1,
 };
 
 const screenTitle: React.CSSProperties = {
@@ -3105,23 +3101,57 @@ const gmCard: React.CSSProperties = {
 };
 
 const globalCSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Fraunces:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700;800&display=swap');
 
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: ${NIGHT}; }
 
-  input[type=range]::-webkit-slider-thumb {
+  /* Branded slider thumb — large, white, ringed, clearly draggable.
+     Scoped to .brenz-slider so we don't break any other native range inputs. */
+  .brenz-slider {
     -webkit-appearance: none;
-    width: 24px; height: 24px; border-radius: 50%;
-    background: ${GOLD};
-    cursor: pointer;
-    border: 3px solid ${NIGHT};
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    appearance: none;
+    background: transparent;
+    outline: none;
   }
-  input[type=range]::-moz-range-thumb {
-    width: 24px; height: 24px; border-radius: 50%;
-    background: ${GOLD}; cursor: pointer;
-    border: 3px solid ${NIGHT};
+  .brenz-slider::-webkit-slider-runnable-track {
+    background: transparent;
+    height: 34px;
+  }
+  .brenz-slider::-moz-range-track {
+    background: transparent;
+    height: 34px;
+  }
+  .brenz-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: ${BRENZ_WHITE};
+    border: 3px solid ${BRENZ_RED};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.4);
+    cursor: grab;
+    margin-top: 0;
+    transition: transform 0.1s;
+  }
+  .brenz-slider:active::-webkit-slider-thumb {
+    transform: scale(1.15);
+    cursor: grabbing;
+  }
+  .brenz-slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: ${BRENZ_WHITE};
+    border: 3px solid ${BRENZ_RED};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    cursor: grab;
+    transition: transform 0.1s;
+  }
+  .brenz-slider:active::-moz-range-thumb {
+    transform: scale(1.15);
+    cursor: grabbing;
   }
 
   @keyframes pulse {
