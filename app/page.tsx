@@ -1748,7 +1748,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
 
         <p style={{ color: BRENZ_CREAM, fontSize: 16, lineHeight: 1.6,
           fontFamily: "'Fraunces',serif", fontStyle: "italic", margin: 0 }}>
-          Have FUN AND<br />LEARN HOW TO RUN A BUSINESS.
+          HAVE FUN AND<br />LEARN HOW TO RUN A BUSINESS.
         </p>
 
         <p style={{ color: "#a8b2bc", fontSize: 14, lineHeight: 1.6,
