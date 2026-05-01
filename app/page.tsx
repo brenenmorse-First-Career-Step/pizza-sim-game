@@ -1748,7 +1748,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
 
         <p style={{ color: BRENZ_CREAM, fontSize: 16, lineHeight: 1.6,
           fontFamily: "'Fraunces',serif", fontStyle: "italic", margin: 0 }}>
-          Try some;<br />you'll taste the love.
+          Have FUN AND<br />LEARN HOW TO RUN A BUSINESS.
         </p>
 
         <p style={{ color: "#a8b2bc", fontSize: 14, lineHeight: 1.6,
@@ -1770,7 +1770,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         </div>
 
         <button onClick={onStart} style={{ ...primaryBtn, marginTop: 28 }}>
-          START MY ORDER →
+          START MY StORE →
         </button>
 
         <div style={{ marginTop: 18, fontSize: 10, color: "#7d8993", letterSpacing: 1.2 }}>
